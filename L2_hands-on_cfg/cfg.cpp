@@ -41,7 +41,7 @@ void AddInst(std::vector<Block> &blocks, Block &currentBlock, const json &inst,
             std::unordered_map<std::string, int> &label2Block,
             std::unordered_map<std::string, std::vector<int>> &fwdDeclPreds);
 
-void LinkNewLabel(std::vector<Block> &blocks, Block &currentBlock,
+void Link2NewLabel(std::vector<Block> &blocks, Block &currentBlock,
                     const std::string label,
                     std::unordered_map<std::string, std::vector<int>> &fwdDeclPreds);
 
@@ -88,7 +88,7 @@ void AddInst(std::vector<Block> &blocks, Block &currentBlock, const json &inst,
 {
     auto opcode = inst.find("op");
     int id = currentBlock.mID;
-    if(opcode == inst.end()){ //found label
+    if(opcode == inst.end()){ //case 1: found "label"
         //end previous block
         if(!currentBlock.Empty()){
             blocks.push_back(currentBlock);
@@ -101,17 +101,17 @@ void AddInst(std::vector<Block> &blocks, Block &currentBlock, const json &inst,
         
         //link edges
         if(blocks.back().fallThrough){ blocks.back().LinkTo(currentBlock); }
-        LinkNewLabel(blocks, currentBlock, label, fwdDeclPreds);
+        Link2NewLabel(blocks, currentBlock, label, fwdDeclPreds);
 
         currentBlock.instrs.push_back(inst);
         return;
     }
     
-    //normal instructiona
+    //case 2: normal instructions
     currentBlock.instrs.push_back(inst);
 
     const auto found = std::find(terminator, terminator + TERMNI_SIZE, inst["op"]);
-    if(found != terminator + TERMNI_SIZE){ //terminator
+    if(found != terminator + TERMNI_SIZE){ //case 3: terminator
         //link edges        
         if(inst.size() != 1) {
             LinkJumps(blocks, currentBlock, inst["labels"], label2Block, fwdDeclPreds);   
@@ -124,7 +124,7 @@ void AddInst(std::vector<Block> &blocks, Block &currentBlock, const json &inst,
     }
 }
 
-void LinkNewLabel(std::vector<Block> &blocks, Block &currentBlock,
+void Link2NewLabel(std::vector<Block> &blocks, Block &currentBlock,
                     const std::string label,
                     std::unordered_map<std::string, std::vector<int>> &fwdDeclPreds)
 {
@@ -133,6 +133,7 @@ void LinkNewLabel(std::vector<Block> &blocks, Block &currentBlock,
     for(int predIdx: fwdDeclPreds[label]){
         blocks[predIdx].LinkTo(currentBlock);
     }
+    fwdDeclPreds.erase(label);
 }
 
 
@@ -142,8 +143,9 @@ void LinkJumps(std::vector<Block> &blocks, Block &currentBlock, const json &labe
 {
     int id = currentBlock.mID;
     for(auto label: labels){
+        //case 3-1: target block not exist yet
         if(label2Block.count(label) == 0) { fwdDeclPreds[label].push_back(id); }
-        else{
+        else{ //case 3-2: have seen target block
             int targetIdx = label2Block[label];
             currentBlock.LinkTo(blocks[targetIdx]);
         }
