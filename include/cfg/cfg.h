@@ -42,8 +42,6 @@ class BasicBlocks{
     Block& operator[](unsigned int i){ return blocks[i]; }
 
  private:
-    json source;
-    
     void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst);
 };
 
@@ -55,12 +53,9 @@ class CFG{
     CFG(const BasicBlocks &blocks): blocks(blocks){}
 
     void ExtractCFG();
-
     void Dump();
 
  private:
-    json source;
-
     std::unordered_map<std::string, std::vector<int>> fwd_decl_preds; //forward declared predcessors
 
     void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst,
