@@ -5,3 +5,9 @@ Each hands-on activity and assignment is organized in a separate folder.
 
 ## Requirements
 1. [nlohmann/json](https://github.com/nlohmann/json)
+
+## Table of Content
+2. Representing Programs  
+    1. [CFG extraction](include/cfg)
+3. Local Analysis & Optimization
+    1. [Simple dead code elimination]()

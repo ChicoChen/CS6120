@@ -5,3 +5,4 @@
 ----
 ## Deepening Familiarity
 1. command piping in Linux/Unix
+2. CMake
