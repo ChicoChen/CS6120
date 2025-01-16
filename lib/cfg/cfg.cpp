@@ -13,9 +13,9 @@ void Block::clear(){
     instrs.clear();
 }
 
-BasicBlocks::BasicBlocks(const json &input){
+BasicBlocks::BasicBlocks(const json &input): functionName(input["name"]){
     Block current_block(blocks.size());
-    for(const auto inst: input){
+    for(const auto inst: input["instrs"]){
         AddInst(blocks, current_block, inst);
     }
 

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <vector>
@@ -30,19 +31,20 @@ struct Block{
 };
 
 class BasicBlocks{
-    using iterator = std::vector<Block>::iterator;
+   using iterator = std::vector<Block>::iterator;
 
  public:
-    std::vector<Block> blocks;
-    BasicBlocks(const json &input);
+   std::string functionName;
+   std::vector<Block> blocks;
+   BasicBlocks(const json &input);
 
-    iterator begin(){ return blocks.begin(); }
-    iterator end(){ return blocks.end(); }
-    size_t size() {return blocks.size(); }
-    Block& operator[](unsigned int i){ return blocks[i]; }
+   iterator begin(){ return blocks.begin(); }
+   iterator end(){ return blocks.end(); }
+   size_t size() {return blocks.size(); }
+   Block& operator[](unsigned int i){ return blocks[i]; }
 
  private:
-    void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst);
+   void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst);
 };
 
 class CFG{
