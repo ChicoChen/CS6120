@@ -12,3 +12,5 @@ target_include_directories(
 
 add_executable(l2_cfg src/l2_cfg.cpp)
 target_link_libraries(l2_cfg CFGlib)
+add_executable(l3_dce src/l3/l3_dce.cpp)
+target_link_libraries(l3_dce CFGlib)
