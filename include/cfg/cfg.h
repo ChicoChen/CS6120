@@ -43,6 +43,8 @@ class BasicBlocks{
    size_t size() {return blocks.size(); }
    Block& operator[](unsigned int i){ return blocks[i]; }
 
+   json dump();
+
  private:
    void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst);
 };

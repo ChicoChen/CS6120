@@ -25,6 +25,18 @@ BasicBlocks::BasicBlocks(const json &input): functionName(input["name"]){
     }
 }
 
+json BasicBlocks::dump(){
+    json instrs = json::array();
+    for(const auto &block: blocks){
+        for(const auto &inst: block.instrs){
+            instrs.push_back(inst);
+        }
+    }
+
+    return json{{"name", functionName}, {"instrs", instrs}};
+}
+
+
 void BasicBlocks::AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst){
     int id = current_block.id;
     if(!inst.contains("op")){ //case 1: found "label"

@@ -10,19 +10,22 @@ void DeadCodeEliminate(Block &block);
 int main(){
     json j;
     j = j.parse(std::cin);
+
+    //for each block, do dead code elimination, and output modified code
+    json outputFuncs = json::array();
     for(const auto &func: j["functions"]){
         BasicBlocks blocks(func);
         for(Block &block: blocks){
-            // std::cout << "block " << block.id << ':' << std::endl;
             size_t codeSize;
             do{
                 codeSize = block.instrs.size();
                 DeadCodeEliminate(block);
             }while(codeSize != block.instrs.size());
         }
-
+        outputFuncs.push_back(std::move(blocks.dump()));
     }
-
+    
+    std::cout << json{{"functions", outputFuncs}} << std::endl;
     return 0;
 }
 
@@ -50,7 +53,6 @@ void DeadCodeEliminate(Block &block){
     }
 
     for(auto iter = unusedLine.rbegin(); iter != unusedLine.rend(); iter++){
-        // std::cout << '\t' << "eliminate line " << *iter << std::endl;
         block.instrs.erase(block.instrs.begin() + *iter);
     }
 }
