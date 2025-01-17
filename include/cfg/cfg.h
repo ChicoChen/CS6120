@@ -13,21 +13,25 @@ using json = nlohmann::json;
 static std::string terminator[3] = {"jmp", "br", "ret"};
 
 struct Block{
-    int id;
-    bool fall_through;
+   int id;
+   bool fall_through;
 
-    std::unordered_set<int> predcessors;
-    std::unordered_set<int> successors;
-    std::vector<json> instrs;
+   std::unordered_set<int> predcessors;
+   std::unordered_set<int> successors;
+   std::vector<json> instrs;
 
-    Block(int new_id): id(new_id), fall_through(true){}
+   Block(int new_id): id(new_id), fall_through(true){}
 
-    bool empty(){ return instrs.empty(); }
-    void clear();
+   //Getters
+   size_t size(){ return instrs.size(); }
+   bool empty(){ return instrs.empty(); }
+   void clear();
 
-    void set_id(int new_id) { id = new_id; }
+   //Setters
+   void set_id(int new_id) { id = new_id; }
 
-    void LinkTo(Block &successor);
+   //Member functions
+   void LinkTo(Block &successor);
 };
 
 class BasicBlocks{
