@@ -8,7 +8,7 @@ void localValueNumbering(Block &block);
 
 int main(){
     json j;
-    j.parse(std::cin);
+    j = j.parse(std::cin);
 
     json outputFuncs = json::array();
     for(auto &func: j["functions"]){

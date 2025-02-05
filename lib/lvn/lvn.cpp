@@ -15,6 +15,13 @@ bool ValueTable::contains(const std::string &var_name){
     return var2num.count(var_name) != 0;
 }  
 
+
+void ValueTable::addElement(const Value &value, const std::string &var_name){
+    int index = val2num.size();
+    val2num[value] = index;
+    var2num[var_name] = index;
+}
+
 Value makeValue(std::string opcode, std::string arg1, std::string arg2,
                 ValueTable &table){
     int num1 = std::min(table[arg1], table[arg2]);
@@ -24,10 +31,4 @@ Value makeValue(std::string opcode, std::string arg1, std::string arg2,
 
 std::string num2name(int num){
     return "$" + std::to_string(num);
-}
-
-void ValueTable::addElement(const Value &value, const std::string &var_name){
-    int index = val2num.size();
-    val2num[value] = index;
-    var2num[var_name] = index;
 }

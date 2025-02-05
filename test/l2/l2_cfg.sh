@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR_PATH="../../bril/test/print"
-BUILDPATH="../../build/l2_cfg"
+BUILDPATH="../../build/cfg"
 
 for TESTCASE in "$DIR_PATH"/*.json; do
     echo "Processing $TESTCASE..."

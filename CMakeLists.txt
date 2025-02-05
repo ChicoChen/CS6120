@@ -10,7 +10,19 @@ target_include_directories(
     CFGlib PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
-add_executable(l2_cfg src/l2_cfg.cpp)
-target_link_libraries(l2_cfg CFGlib)
-add_executable(l3_dce src/l3/l3_dce.cpp)
-target_link_libraries(l3_dce CFGlib)
+add_library(LVNlib STATIC
+    lib/lvn/lvn.cpp
+)
+target_include_directories(
+    LVNlib PUBLIC ${PROJECT_SOURCE_DIR}/include
+)
+
+
+add_executable(cfg src/l2_cfg.cpp)
+target_link_libraries(cfg CFGlib)
+
+add_executable(dce src/l3/l3_dce.cpp)
+target_link_libraries(dce CFGlib)
+
+add_executable(lvn src/l3/l3_lvn.cpp)
+target_link_libraries(lvn CFGlib LVNlib)

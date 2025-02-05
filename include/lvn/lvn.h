@@ -24,10 +24,6 @@ namespace std {
     };
 }
 
-Value makeValue(std::string opcode, std::string arg1, std::string arg2,
-                ValueTable &table);
-std::string num2name(int num);
-
 class ValueTable{
  public:
     
@@ -44,3 +40,7 @@ class ValueTable{
     std::unordered_map<Value, int> val2num;
     std::unordered_map<std::string, int> var2num;
 };
+
+Value makeValue(std::string opcode, std::string arg1, std::string arg2,
+                ValueTable &table);
+std::string num2name(int num);
