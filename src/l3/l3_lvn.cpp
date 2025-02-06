@@ -47,9 +47,10 @@ void localValueNumbering(Block &block){
 
     **********/
    ValueTable table;
+   //TODO: fully replace original variable name with $[index] 
     for(auto &instr: block.instrs){
         if(instr.contains("dest")){ // assignment, maybe create a new element
-            Value value = makeValue(instr["opcode"], instr["args"][0], instr["args"][1], table);
+            Value value = makeValue(instr, table);
             auto dest = instr["dest"];
             if(table.contains(value)){ // value already exist
                 int index = table[value];
@@ -57,9 +58,11 @@ void localValueNumbering(Block &block){
             }
             else{ // found a new value
                 table.addElement(value, instr["dest"]);
+                instr["dest"] = num2name(table[value]);
             }
         }
-        else if(instr.contains("args")){ // replace operand with table index
+
+        if(instr.contains("args")){ // replace operand with table index
             for(auto &variable: instr["args"]){
                 if(!table.contains(variable)){
                     std::cerr << "[ERROR]: arg not found, " << variable << std::endl;

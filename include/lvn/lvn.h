@@ -1,7 +1,11 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 struct Value{
     std::string op;
@@ -29,8 +33,8 @@ class ValueTable{
     
     ValueTable() = default; 
     
-    int& operator[](const std::string var_name);
     int& operator[](const Value &value);
+    int& operator[](const std::string &var_name);
     bool contains(const Value &value);
     bool contains(const std::string &var_name);
 
@@ -41,6 +45,5 @@ class ValueTable{
     std::unordered_map<std::string, int> var2num;
 };
 
-Value makeValue(std::string opcode, std::string arg1, std::string arg2,
-                ValueTable &table);
+Value makeValue(const json &instr, ValueTable &table);
 std::string num2name(int num);

@@ -3,7 +3,7 @@ int& ValueTable::operator[](const Value &value){
     return val2num[value]; 
 }
 
-int& ValueTable::operator[](const std::string var_name){
+int& ValueTable::operator[](const std::string &var_name){
     return var2num[var_name]; 
 }
 
@@ -22,11 +22,20 @@ void ValueTable::addElement(const Value &value, const std::string &var_name){
     var2num[var_name] = index;
 }
 
-Value makeValue(std::string opcode, std::string arg1, std::string arg2,
-                ValueTable &table){
-    int num1 = std::min(table[arg1], table[arg2]);
-    int num2 = std::max(table[arg1], table[arg2]);
-    return Value(opcode, num1, num2);
+Value makeValue(const json &instr, ValueTable &table){
+    if(instr["op"] == "const"){
+        return Value("const", instr["value"], -1);
+    }
+    else if(instr.contains("args") && instr["args"].size() == 2){
+        std::string arg1 = instr["args"][0];
+        std::string arg2 = instr["args"][1];
+        int num1 = table[arg1], num2 = table[arg2];
+        return Value(instr["op"], std::min(num1, num2), std::max(num1, num2));
+    }
+    else{
+        std::cerr << "[ERROR]: unrecongnized instruction when makeValue(): " << instr << std::endl;
+        return Value("Error", -1, -1);
+    }
 }
 
 std::string num2name(int num){
