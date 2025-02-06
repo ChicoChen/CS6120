@@ -13,7 +13,11 @@ void Block::clear(){
     instrs.clear();
 }
 
-BasicBlocks::BasicBlocks(const json &input): functionName(input["name"]){
+BasicBlocks::BasicBlocks(const json &input):
+    function_name(input["name"]),
+    args(input.contains("args")? input["args"] : json{}),
+    return_type(input.contains("type")? input["type"]: "")
+{
     Block current_block(blocks.size());
     for(const auto inst: input["instrs"]){
         AddInst(blocks, current_block, inst);
@@ -26,14 +30,20 @@ BasicBlocks::BasicBlocks(const json &input): functionName(input["name"]){
 }
 
 json BasicBlocks::dump(){
+    json output;
+    output["name"] = function_name;
+    if(!args.empty()) output["args"] = args;
+    if(!return_type.empty()) output["type"] = return_type;
+
     json instrs = json::array();
     for(const auto &block: blocks){
         for(const auto &inst: block.instrs){
             instrs.push_back(inst);
         }
     }
+    output["instrs"] = instrs;
 
-    return json{{"name", functionName}, {"instrs", instrs}};
+    return std::move(output);
 }
 
 

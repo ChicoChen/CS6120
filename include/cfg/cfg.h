@@ -38,7 +38,7 @@ class BasicBlocks{
    using iterator = std::vector<Block>::iterator;
 
  public:
-   std::string functionName;
+   std::string function_name;
    std::vector<Block> blocks;
    BasicBlocks(const json &input);
 
@@ -47,9 +47,13 @@ class BasicBlocks{
    size_t size() {return blocks.size(); }
    Block& operator[](unsigned int i){ return blocks[i]; }
 
+   json getArgs();
    json dump();
 
  private:
+   std::string return_type;
+   json args;
+
    void AddInst(std::vector<Block> &blocks, Block &current_block, const json &inst);
 };
 
