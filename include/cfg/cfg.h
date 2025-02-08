@@ -25,10 +25,10 @@ struct Block{
    //Getters
    size_t size(){ return instrs.size(); }
    bool empty(){ return instrs.empty(); }
-   void clear();
 
    //Setters
-   void set_id(int new_id) { id = new_id; }
+   void clear();
+   void setID(int new_id) { id = new_id; }
 
    //Member functions
    void LinkTo(Block &successor);
@@ -47,8 +47,9 @@ class BasicBlocks{
    size_t size() {return blocks.size(); }
    Block& operator[](unsigned int i){ return blocks[i]; }
 
-   json getArgs();
-   json dump();
+   json &getArgs();
+
+   json Dump();
 
  private:
    std::string return_type;

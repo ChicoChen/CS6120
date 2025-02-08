@@ -28,8 +28,11 @@ BasicBlocks::BasicBlocks(const json &input):
         blocks.push_back(current_block);
     }
 }
+json &BasicBlocks::getArgs(){
+    return args;
+}
 
-json BasicBlocks::dump(){
+json BasicBlocks::Dump(){
     json output;
     output["name"] = function_name;
     if(!args.empty()) output["args"] = args;
@@ -54,7 +57,7 @@ void BasicBlocks::AddInst(std::vector<Block> &blocks, Block &current_block, cons
         if(!current_block.empty()){
             blocks.push_back(current_block);
             current_block.clear();
-            current_block.set_id(++id);
+            current_block.setID(++id);
         }
 
         current_block.instrs.push_back(inst);
@@ -71,7 +74,7 @@ void BasicBlocks::AddInst(std::vector<Block> &blocks, Block &current_block, cons
         current_block.fall_through = false;
         blocks.push_back(current_block);
         current_block.clear();
-        current_block.set_id(++id);
+        current_block.setID(++id);
     }
 }
 

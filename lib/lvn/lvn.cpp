@@ -15,14 +15,24 @@ bool ValueTable::contains(const std::string &var_name){
     return var2num.count(var_name) != 0;
 }  
 
+void ValueTable::AddArgs(const json &args){
+    for(int i = 0; i < args.size(); i++){
+        std::string arg_name = args[i]["name"];
+        Value value(arg_name, -1, i);
 
-void ValueTable::addElement(const Value &value, const std::string &var_name){
+        int index = val2num.size();
+        val2num[value] = index;
+        var2num[arg_name] = index;
+    }
+}
+
+void ValueTable::AddElement(const Value &value, const std::string &var_name){
     int index = val2num.size();
     val2num[value] = index;
     var2num[var_name] = index;
 }
 
-Value makeValue(const json &instr, ValueTable &table){
+Value MakeValue(const json &instr, ValueTable &table){
     if(instr["op"] == "const"){
         return Value("const", instr["value"], -1);
     }
@@ -38,6 +48,6 @@ Value makeValue(const json &instr, ValueTable &table){
     }
 }
 
-std::string num2name(int num){
+std::string Num2Name(int num){
     return "$" + std::to_string(num);
 }

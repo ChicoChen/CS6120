@@ -38,12 +38,13 @@ class ValueTable{
     bool contains(const Value &value);
     bool contains(const std::string &var_name);
 
-    void addElement(const Value &value, const std::string &var_name);
+    void AddElement(const Value &value, const std::string &var_name);
+    void AddArgs(const json &args);
 
  private:
     std::unordered_map<Value, int> val2num;
     std::unordered_map<std::string, int> var2num;
 };
 
-Value makeValue(const json &instr, ValueTable &table);
-std::string num2name(int num);
+Value MakeValue(const json &instr, ValueTable &table);
+std::string Num2Name(int num);

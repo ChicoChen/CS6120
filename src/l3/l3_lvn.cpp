@@ -4,7 +4,9 @@
 #include "cfg/cfg.h"
 #include "lvn/lvn.h"
 
-void localValueNumbering(Block &block);
+using json = nlohmann::json;
+
+void localValueNumbering(Block &block, ValueTable &table);
 
 int main(){
     json j;
@@ -13,63 +15,47 @@ int main(){
     json outputFuncs = json::array();
     for(auto &func: j["functions"]){
         BasicBlocks blocks(func);
-        for(auto &block: blocks){
-            localValueNumbering(block);
+        ValueTable table;
+        if(func.contains("args")) {
+            table.AddArgs(func["args"]);
+            for(auto &arg: blocks.getArgs()){
+                arg["name"] = Num2Name(table[arg["name"]]);
+            }
         }
-        outputFuncs.push_back(std::move(blocks.dump()));
+
+        for(auto &block: blocks){
+            localValueNumbering(block, table);
+        }
+        outputFuncs.push_back(std::move(blocks.Dump()));
     }
 
     std::cout << json{{"functions", outputFuncs}} << std::endl;
     return 0;
 }
 
-void localValueNumbering(Block &block){
-    /********* pesudo Code
-    for each function:
-        for each block:
-            val2num = a table that map value to number
-            num2var = vector of canonical variable name
-            var2num
-            getCaconical = from any var name, return to its canonical alternative name.
-            for instr in that block:
-                if instr is assignment:
-                    value = (OP, var2num[argu1], var2num[argu2])
-                    dest = instr.dest
-                    if(dest is used before): //this is a re-assignment
-                        dest needed to be given a new name
-                        modify getCanonical to get new name from dest.
-
-                    if value in value_table:
-                        //find reuse opportunity
-
-                    else:
-                        add_new_element(valueTable, value);
-
-    **********/
-   ValueTable table;
-   //TODO: fully replace original variable name with $[index] 
+void localValueNumbering(Block &block, ValueTable &table){
     for(auto &instr: block.instrs){
-        if(instr.contains("dest")){ // assignment, maybe create a new element
-            Value value = makeValue(instr, table);
+        if(instr.contains("dest")){ //assignment, maybe create a new element
+            Value value = MakeValue(instr, table);
             auto dest = instr["dest"];
-            if(table.contains(value)){ // value already exist
+            if(table.contains(value)){ //value already exist
                 int index = table[value];
                 table[dest] = index;
+                instr["dest"] = Num2Name(index);
             }
-            else{ // found a new value
-                table.addElement(value, instr["dest"]);
-                instr["dest"] = num2name(table[value]);
+            else{ //found a new value
+                table.AddElement(value, instr["dest"]);
+                instr["dest"] = Num2Name(table[value]);
             }
         }
 
-        if(instr.contains("args")){ // replace operand with table index
+        if(instr.contains("args")){ //replace operand with table index
             for(auto &variable: instr["args"]){
                 if(!table.contains(variable)){
                     std::cerr << "[ERROR]: arg not found, " << variable << std::endl;
                     continue;
                 }
-
-                variable = num2name(table[variable]);
+                variable = Num2Name(table[variable]);
             }
         }
     }

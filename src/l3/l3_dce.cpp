@@ -19,7 +19,7 @@ int main(int argc, char** argv){
     for(const auto &func: j["functions"]){
         BasicBlocks blocks(func);
         DeadCodeElimination(blocks, simple_mode);
-        outputFuncs.push_back(std::move(blocks.dump()));
+        outputFuncs.push_back(std::move(blocks.Dump()));
     }
     
     std::cout << json{{"functions", outputFuncs}} << std::endl;
