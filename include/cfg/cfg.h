@@ -36,6 +36,7 @@ struct Block{
 
 class BasicBlocks{
    using iterator = std::vector<Block>::iterator;
+   using const_iter = std::vector<Block>::const_iterator;
 
  public:
    std::string function_name;
@@ -44,6 +45,8 @@ class BasicBlocks{
 
    iterator begin(){ return blocks.begin(); }
    iterator end(){ return blocks.end(); }
+   const_iter begin() const{ return blocks.begin(); }
+   const_iter end() const { return blocks.end(); }
    size_t size() {return blocks.size(); }
    Block& operator[](unsigned int i){ return blocks[i]; }
 
