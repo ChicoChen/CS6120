@@ -40,8 +40,10 @@ class ValueTable{
 
     void AddElement(const Value &value, const std::string &variable, const std::string &name);
     void AddArgs(const json &args);
+    void AddLegacyValue(std::string var_name);
     
     std::string getNickname();
+
 
  private:
     std::unordered_map<Value, std::string> val2name;

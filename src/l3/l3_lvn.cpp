@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 void LocalValueNumbering(BasicBlocks &blocks);
 std::unordered_map<std::string, int> trackAssignments(const Block &block);
-void NumberingValue(Block &block, ValueTable &table,
+void NumberingValue(Block &block, ValueTable table,
                     std::unordered_map<std::string, int> &assignments);
 void replaceArgs(json &instr, ValueTable &table);
 
@@ -44,14 +44,23 @@ void LocalValueNumbering(BasicBlocks &blocks){
 
 std::unordered_map<std::string, int> trackAssignments(const Block &block){
     std::unordered_map<std::string, int> assignments;
+    std::unordered_set<std::string> legacies;
     for(const auto & instr: block.instrs){
-        if(!instr.contains("dest"))continue;        
-        assignments[instr["dest"]]++;
+        //TODO: handle legacy variables
+        // if(instr.contains("args")){
+        //     for(const std::string &arg: instr["args"]){
+        //         if(assignments.count(arg) == 0){
+        //             legacies.insert(arg);
+        //         }
+        //     }
+        // }
+        if(instr.contains("dest")) assignments[instr["dest"]]++;
     }
+
     return assignments;
 }
 
-void NumberingValue(Block &block, ValueTable &table,
+void NumberingValue(Block &block, ValueTable table,
                     std::unordered_map<std::string, int> &assignments)
 {
     for(auto &instr: block.instrs){
@@ -60,6 +69,9 @@ void NumberingValue(Block &block, ValueTable &table,
 
             assignments[dest]--;
             if(instr["op"] == "id"){
+                if(!table.contains(instr["args"][0])){
+                    table.AddLegacyValue(instr["args"][0]);
+                }
                 std::string equivalent = table[instr["args"][0]];
                 replaceArgs(instr, table);
                 table[dest] = equivalent;
@@ -78,17 +90,20 @@ void NumberingValue(Block &block, ValueTable &table,
                 }
             }
         }
+        else if(instr.contains("args")){ //instruct with no dest like return, invoke void function, etc
+            replaceArgs(instr, table);
+        }
     }
 }
 
 void replaceArgs(json &instr, ValueTable &table){
-    if(!instr.contains("args")) return;
     for(auto &arg: instr["args"]){
         if(!table.contains(arg)){
             std::cerr << "[ERROR]: can't find key " << arg.get<std::string>()
                         << " in ValueTable" << std::endl;
             continue;
         }
+
         arg = table[arg];
     }
 }
