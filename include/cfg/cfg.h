@@ -43,15 +43,19 @@ class BasicBlocks{
    std::vector<Block> blocks;
    BasicBlocks(const json &input);
 
+   //STL section
    iterator begin(){ return blocks.begin(); }
    iterator end(){ return blocks.end(); }
    const_iter begin() const{ return blocks.begin(); }
-   const_iter end() const { return blocks.end(); }
-   size_t size() {return blocks.size(); }
+   const_iter end() const{ return blocks.end(); }
+   size_t size(){return blocks.size(); }
    Block& operator[](unsigned int i){ return blocks[i]; }
 
+   //getters
    json &getArgs();
+   bool hasArgs();
 
+   //Other member functions
    json Dump();
 
  private:

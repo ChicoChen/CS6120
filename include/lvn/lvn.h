@@ -9,9 +9,9 @@ using json = nlohmann::json;
 
 struct Value{
     std::string op;
-    int arg1; //int: "12" or string name "$12"?
-    int arg2;
-    Value(std::string opcode, int arg1, int arg2): op(opcode), arg1(arg1), arg2(arg2) {}
+    std::string arg1;
+    std::string arg2;
+    Value(std::string opcode, std::string arg1, std::string arg2): op(opcode), arg1(arg1), arg2(arg2) {}
 
     bool operator==(const Value &other) const {
         return op == other.op && arg1 == other.arg1 && arg2 == other.arg2;
@@ -23,7 +23,7 @@ namespace std {
     template <>
     struct hash<Value> {
         std::size_t operator()(const Value& v) const {
-            return std::hash<std::string>()(v.op) ^ std::hash<int>()(v.arg1) ^ std::hash<int>()(v.arg2);
+            return std::hash<std::string>()(v.op) ^ std::hash<std::string>()(v.arg1) ^ std::hash<std::string>()(v.arg2);
         }
     };
 }
@@ -33,18 +33,21 @@ class ValueTable{
     
     ValueTable() = default; 
     
-    int& operator[](const Value &value);
-    int& operator[](const std::string &var_name);
+    std::string& operator[](const Value &value);
+    std::string& operator[](const std::string &var_name);
     bool contains(const Value &value);
     bool contains(const std::string &var_name);
 
-    void AddElement(const Value &value, const std::string &var_name);
+    void AddElement(const Value &value, const std::string &variable, const std::string &name);
     void AddArgs(const json &args);
+    
+    std::string getNickname();
 
  private:
-    std::unordered_map<Value, int> val2num;
-    std::unordered_map<std::string, int> var2num;
+    std::unordered_map<Value, std::string> val2name;
+    std::unordered_map<std::string, std::string> var2name;
+
 };
 
 Value MakeValue(const json &instr, ValueTable &table);
-std::string Num2Name(int num);
+// std::string Num2Name(int num);

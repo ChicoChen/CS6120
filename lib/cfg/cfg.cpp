@@ -28,8 +28,13 @@ BasicBlocks::BasicBlocks(const json &input):
         blocks.push_back(current_block);
     }
 }
+
 json &BasicBlocks::getArgs(){
     return args;
+}
+
+bool BasicBlocks::hasArgs(){
+    return !args.empty();
 }
 
 json BasicBlocks::Dump(){

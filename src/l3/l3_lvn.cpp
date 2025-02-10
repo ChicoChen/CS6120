@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <nlohmann/json.hpp>
 
 #include "cfg/cfg.h"
@@ -6,7 +7,11 @@
 
 using json = nlohmann::json;
 
-void localValueNumbering(Block &block, ValueTable &table);
+void LocalValueNumbering(BasicBlocks &blocks);
+std::unordered_map<std::string, int> trackAssignments(const Block &block);
+void NumberingValue(Block &block, ValueTable &table,
+                    std::unordered_map<std::string, int> &assignments);
+void replaceArgs(json &instr, ValueTable &table);
 
 int main(){
     json j;
@@ -15,17 +20,7 @@ int main(){
     json outputFuncs = json::array();
     for(auto &func: j["functions"]){
         BasicBlocks blocks(func);
-        ValueTable table;
-        if(func.contains("args")) {
-            table.AddArgs(func["args"]);
-            for(auto &arg: blocks.getArgs()){
-                arg["name"] = Num2Name(table[arg["name"]]);
-            }
-        }
-
-        for(auto &block: blocks){
-            localValueNumbering(block, table);
-        }
+        LocalValueNumbering(blocks);
         outputFuncs.push_back(std::move(blocks.Dump()));
     }
 
@@ -33,30 +28,67 @@ int main(){
     return 0;
 }
 
-void localValueNumbering(Block &block, ValueTable &table){
+void LocalValueNumbering(BasicBlocks &blocks){
+    ValueTable table;
+
+    if(blocks.hasArgs()){
+        auto &args = blocks.getArgs();
+        table.AddArgs(args);
+    }
+
+    for(auto &block: blocks){
+        std::unordered_map<std::string, int> assignments = std::move(trackAssignments(block));
+        NumberingValue(block, table, assignments);
+    }
+}
+
+std::unordered_map<std::string, int> trackAssignments(const Block &block){
+    std::unordered_map<std::string, int> assignments;
+    for(const auto & instr: block.instrs){
+        if(!instr.contains("dest"))continue;        
+        assignments[instr["dest"]]++;
+    }
+    return assignments;
+}
+
+void NumberingValue(Block &block, ValueTable &table,
+                    std::unordered_map<std::string, int> &assignments)
+{
     for(auto &instr: block.instrs){
         if(instr.contains("dest")){ //assignment, maybe create a new element
-            Value value = MakeValue(instr, table);
-            auto dest = instr["dest"];
-            if(table.contains(value)){ //value already exist
-                int index = table[value];
-                table[dest] = index;
-                instr["dest"] = Num2Name(index);
-            }
-            else{ //found a new value
-                table.AddElement(value, instr["dest"]);
-                instr["dest"] = Num2Name(table[value]);
-            }
-        }
+            std::string dest = instr["dest"];
 
-        if(instr.contains("args")){ //replace operand with table index
-            for(auto &variable: instr["args"]){
-                if(!table.contains(variable)){
-                    std::cerr << "[ERROR]: arg not found, " << variable << std::endl;
-                    continue;
+            assignments[dest]--;
+            if(instr["op"] == "id"){
+                std::string equivalent = table[instr["args"][0]];
+                replaceArgs(instr, table);
+                table[dest] = equivalent;
+            }
+            else{
+                Value value = MakeValue(instr, table);
+                replaceArgs(instr, table);
+                if(table.contains(value)){ //value already exist
+                    std::string equivalent = table[value];
+                    table[dest] = equivalent;
                 }
-                variable = Num2Name(table[variable]);
+                else{ //found a new value
+                    std::string equivalent = (assignments[dest] == 0)? dest: table.getNickname();
+                    table.AddElement(value, dest, equivalent);
+                    instr["dest"] = equivalent;
+                }
             }
         }
+    }
+}
+
+void replaceArgs(json &instr, ValueTable &table){
+    if(!instr.contains("args")) return;
+    for(auto &arg: instr["args"]){
+        if(!table.contains(arg)){
+            std::cerr << "[ERROR]: can't find key " << arg.get<std::string>()
+                        << " in ValueTable" << std::endl;
+            continue;
+        }
+        arg = table[arg];
     }
 }
