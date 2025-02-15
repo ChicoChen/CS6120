@@ -30,14 +30,10 @@ void ValueTable::AddArgs(const json &args){
     }
 }
 
-std::string ValueTable::getNickname(){
-    return "$" + std::to_string(val2name.size());
-}
-
-void ValueTable::AddLegacyValue(std::string var_name){
-    Value value("declared", var_name, "");
-    val2name[value] = var_name;
-    var2name[var_name] = var_name;
+void ValueTable::AddLegacyValue(std::string var, std::string name){
+    Value value("declared", var, "");
+    val2name[value] = name;
+    var2name[var] = name;
 }
 
 Value MakeValue(const json &instr, ValueTable &table){
@@ -48,17 +44,23 @@ Value MakeValue(const json &instr, ValueTable &table){
         int val = instr["value"];
         return Value("const", std::to_string(val), "");
     }
+
+    if(opcode == "id"){
+        return Value("id", instr["args"][0], "");
+    }
+
     
     if(instr.contains("args")){
         std::string arg1 = instr["args"][0];
-        if(!table.contains(arg1)) table.AddLegacyValue(arg1);
+        if(!table.contains(arg1)) table.AddLegacyValue(arg1, arg1);
         arg1 = table[arg1];
 
         if(instr["args"].size() == 2){ //binary operaion
             std::string arg2 = instr["args"][1];
-            if(!table.contains(arg2)) table.AddLegacyValue(arg2);
+            if(!table.contains(arg2)) table.AddLegacyValue(arg2, arg2);
             arg2 = table[arg2];
-            return Value(instr["op"], std::min(arg1, arg2), std::max(arg1, arg2));
+            if(opcode == "add" || opcode == "mul") return Value(instr["op"], std::min(arg1, arg2), std::max(arg1, arg2));
+            else return Value(instr["op"], arg1, arg2);
         }
         else{ //unary operaion
             return Value(instr["op"], arg1, "");

@@ -11,7 +11,10 @@ struct Value{
     std::string op;
     std::string arg1;
     std::string arg2;
+    std::string property = "";
     Value(std::string opcode, std::string arg1, std::string arg2): op(opcode), arg1(arg1), arg2(arg2) {}
+    Value(std::string opcode, std::string arg1, std::string arg2, std::string property):
+        op(opcode), arg1(arg1), arg2(arg2), property(property) {}
 
     bool operator==(const Value &other) const {
         return op == other.op && arg1 == other.arg1 && arg2 == other.arg2;
@@ -40,10 +43,7 @@ class ValueTable{
 
     void AddElement(const Value &value, const std::string &variable, const std::string &name);
     void AddArgs(const json &args);
-    void AddLegacyValue(std::string var_name);
-    
-    std::string getNickname();
-
+    void AddLegacyValue(std::string var, std::string name);
 
  private:
     std::unordered_map<Value, std::string> val2name;
