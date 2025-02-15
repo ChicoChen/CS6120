@@ -42,7 +42,7 @@ Value MakeValue(const json &instr, ValueTable &table){
 
     if(opcode == "const"){
         int val = instr["value"];
-        return Value("const", std::to_string(val), "");
+        return Value("const", std::to_string(val), instr["type"]);
     }
 
     if(opcode == "id"){

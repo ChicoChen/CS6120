@@ -138,8 +138,8 @@ void NumberingValue(Block &block, ValueTable table,
 void replaceArgs(json &instr, ValueTable &table){
     for(auto &arg: instr["args"]){
         if(!table.contains(arg)){
-            std::cerr << "[ERROR]: can't find key " << arg.get<std::string>()
-                        << " in ValueTable" << std::endl;
+            // std::cerr << "[ERROR]: can't find key " << arg.get<std::string>()
+            //             << " in ValueTable" << std::endl;
             continue;
         }
 
