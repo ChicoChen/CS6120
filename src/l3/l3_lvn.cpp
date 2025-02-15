@@ -87,12 +87,11 @@ void AddLegacyLines(Block &block, const std::unordered_map<std::string, std::str
     auto insert_tagrget = instrs.begin();
     if(instrs[0].contains("label")) insert_tagrget++;
     for(const auto &leg: legacy_vars){
-        //{"args":["v2"],"dest":"i","op":"id","type":"int"}
         json newline;
         newline["args"] = {leg.first};
         newline["dest"] = getLegacyName(leg.first);
         newline["op"] = "id";
-        newline["type"] = leg.second; //TODO
+        newline["type"] = leg.second; //TODO: the type might be int or bool, currently default int.
         insert_tagrget = instrs.insert(insert_tagrget, newline);
     }
 }
@@ -138,8 +137,6 @@ void NumberingValue(Block &block, ValueTable table,
 void replaceArgs(json &instr, ValueTable &table){
     for(auto &arg: instr["args"]){
         if(!table.contains(arg)){
-            std::cerr << "[ERROR]: can't find key " << arg.get<std::string>()
-                        << " in ValueTable" << std::endl;
             continue;
         }
 

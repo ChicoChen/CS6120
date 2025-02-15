@@ -1,4 +1,28 @@
 #include "lvn/lvn.h"
+Value::Value(std::string opcode, std::string arg, std::string property)
+            :op(opcode), property(property)
+{
+    args.push_back(arg);
+}
+
+Value::Value(std::string opcode, json args_json, std::string property)
+            :op(opcode), property(property)
+{
+    for(std::string arg: args_json){
+        args.push_back(arg);
+    }
+}
+
+bool Value::operator==(const Value &other) const {
+    if(op != other.op || property != other.property) return false;
+    else if(args.size() != other.args.size()) return false;
+
+    for(int i = 0; i < args.size(); i++){
+        if(args[i] != other.args[i]) return false;
+    }
+    return true;
+}
+
 std::string& ValueTable::operator[](const Value &value){
     return val2name[value]; 
 }
@@ -31,43 +55,38 @@ void ValueTable::AddArgs(const json &args){
 }
 
 void ValueTable::AddLegacyValue(std::string var, std::string name){
-    Value value("declared", var, "");
+    Value value("declared", var);
     val2name[value] = name;
     var2name[var] = name;
 }
 
 Value MakeValue(const json &instr, ValueTable &table){
-    //need also to conside case: {"args":["cond_temp"],"dest":"v15","op":"not","type":"bool"}
     std::string opcode = instr.value("op", "");
 
     if(opcode == "const"){
         int val = instr["value"];
-        return Value("const", std::to_string(val), "");
+        return Value("const", std::to_string(val), instr["type"]);
     }
-
-    if(opcode == "id"){
-        return Value("id", instr["args"][0], "");
+    else if(opcode == "id"){
+        return Value("id", instr["args"][0]);
     }
 
     
     if(instr.contains("args")){
-        std::string arg1 = instr["args"][0];
-        if(!table.contains(arg1)) table.AddLegacyValue(arg1, arg1);
-        arg1 = table[arg1];
+        json args = instr["args"];
+        std::string property = "";
+        for(auto &arg: args){
+            if(!table.contains(arg)) table.AddLegacyValue(arg, arg);
+            arg = table[arg];
+        }
 
-        if(instr["args"].size() == 2){ //binary operaion
-            std::string arg2 = instr["args"][1];
-            if(!table.contains(arg2)) table.AddLegacyValue(arg2, arg2);
-            arg2 = table[arg2];
-            if(opcode == "add" || opcode == "mul") return Value(instr["op"], std::min(arg1, arg2), std::max(arg1, arg2));
-            else return Value(instr["op"], arg1, arg2);
-        }
-        else{ //unary operaion
-            return Value(instr["op"], arg1, "");
-        }
+        if(opcode == "add" || opcode == "mul") std::sort(args.begin(), args.end());
+        else if(opcode == "call") property = instr["funcs"][0];
+
+        return Value(instr["op"], args, property);
     }
     else{
         std::cerr << "[ERROR]: unrecongnized instruction when makeValue(): " << instr << std::endl;
-        return Value("Error", "", "");
+        return Value("Error", static_cast<std::string>(""));
     }
 }

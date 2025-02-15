@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
 
@@ -9,16 +10,12 @@ using json = nlohmann::json;
 
 struct Value{
     std::string op;
-    std::string arg1;
-    std::string arg2;
-    std::string property = "";
-    Value(std::string opcode, std::string arg1, std::string arg2): op(opcode), arg1(arg1), arg2(arg2) {}
-    Value(std::string opcode, std::string arg1, std::string arg2, std::string property):
-        op(opcode), arg1(arg1), arg2(arg2), property(property) {}
+    std::vector<std::string> args;
+    std::string property;
+    Value(std::string opcode, std::string arg, std::string property = "");
+    Value(std::string opcode, json args_json, std::string property = "");
 
-    bool operator==(const Value &other) const {
-        return op == other.op && arg1 == other.arg1 && arg2 == other.arg2;
-    }
+    bool operator==(const Value &other) const;
 
 };
 
@@ -26,7 +23,11 @@ namespace std {
     template <>
     struct hash<Value> {
         std::size_t operator()(const Value& v) const {
-            return std::hash<std::string>()(v.op) ^ std::hash<std::string>()(v.arg1) ^ std::hash<std::string>()(v.arg2);
+            auto hash = std::hash<std::string>()(v.op) ^ std::hash<std::string>()(v.property);
+            for(const auto &arg: v.args){
+                hash = hash ^ std::hash<std::string>()(arg);
+            }
+            return hash;
         }
     };
 }
