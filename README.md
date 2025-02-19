@@ -10,4 +10,5 @@ Each hands-on activity and assignment is organized in a separate folder.
 2. Representing Programs  
     1. [CFG extraction](include/cfg)
 3. Local Analysis & Optimization
-    1. [Simple dead code elimination]()
+    1. [Simple dead code elimination](src/l3/l3_dce.cpp)
+    2. [Local Value Numbering](include/lvn)
